@@ -45,13 +45,13 @@ func Authenticator(next http.Handler) http.Handler {
 // be the generic `jwtauth.Authenticator` middleware or your own custom handler
 // which checks the request context jwt token and error to prepare a custom
 // http response.
-func Verifier(ja *JWTAuth) func(http.Handler) http.Handler {
+func Verifier(ja *jwtAuth) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return Verify(ja, TokenFromQuery, TokenFromHeader, TokenFromCookie)(next)
 	}
 }
 
-func Verify(ja *JWTAuth, findTokenFns ...func(r *http.Request) string) func(http.Handler) http.Handler {
+func Verify(ja *jwtAuth, findTokenFns ...func(r *http.Request) string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hfn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -63,7 +63,7 @@ func Verify(ja *JWTAuth, findTokenFns ...func(r *http.Request) string) func(http
 	}
 }
 
-func VerifyRequest(ja *JWTAuth, r *http.Request, findTokenFns ...func(r *http.Request) string) (*jwt.Token, error) {
+func VerifyRequest(ja *jwtAuth, r *http.Request, findTokenFns ...func(r *http.Request) string) (*jwt.Token, error) {
 	var tokenStr string
 	var err error
 

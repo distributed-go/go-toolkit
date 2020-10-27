@@ -1,3 +1,3 @@
 package jwtauth
 
-type JWT interface{}
+type JWTAuth interface{}

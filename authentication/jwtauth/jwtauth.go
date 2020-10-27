@@ -4,7 +4,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-type JWTAuth struct {
+type jwtAuth struct {
 	signKey   interface{}
 	verifyKey interface{}
 	signer    jwt.SigningMethod
@@ -14,8 +14,8 @@ type JWTAuth struct {
 // New creates a JWTAuth authenticator instance that provides middleware handlers
 // and encoding/decoding functions for JWT signing.
 // *jwt.Parser is custom parser settings introduced in jwt-go/v2.4.0.
-func New(alg string, parser *jwt.Parser, signKey interface{}, verifyKey interface{}) *JWTAuth {
-	return &JWTAuth{
+func New(alg string, parser *jwt.Parser, signKey interface{}, verifyKey interface{}) JWTAuth {
+	return jwtAuth{
 		signKey:   signKey,
 		verifyKey: verifyKey,
 		signer:    jwt.GetSigningMethod(alg),

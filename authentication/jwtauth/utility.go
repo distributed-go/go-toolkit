@@ -98,7 +98,7 @@ func SetExpiryIn(claims jwt.MapClaims, tm time.Duration) {
 	claims["exp"] = ExpireIn(tm)
 }
 
-func (ja *JWTAuth) keyFunc(t *jwt.Token) (interface{}, error) {
+func (ja *jwtAuth) keyFunc(t *jwt.Token) (interface{}, error) {
 	if ja.verifyKey != nil {
 		return ja.verifyKey, nil
 	} else {
@@ -106,7 +106,7 @@ func (ja *JWTAuth) keyFunc(t *jwt.Token) (interface{}, error) {
 	}
 }
 
-func (ja *JWTAuth) Encode(claims jwt.Claims) (t *jwt.Token, tokenString string, err error) {
+func (ja *jwtAuth) Encode(claims jwt.Claims) (t *jwt.Token, tokenString string, err error) {
 	t = jwt.New(ja.signer)
 	t.Claims = claims
 	tokenString, err = t.SignedString(ja.signKey)
@@ -114,7 +114,7 @@ func (ja *JWTAuth) Encode(claims jwt.Claims) (t *jwt.Token, tokenString string, 
 	return
 }
 
-func (ja *JWTAuth) Decode(tokenString string) (t *jwt.Token, err error) {
+func (ja *jwtAuth) Decode(tokenString string) (t *jwt.Token, err error) {
 	t, err = ja.parser.Parse(tokenString, ja.keyFunc)
 	if err != nil {
 		return nil, err
