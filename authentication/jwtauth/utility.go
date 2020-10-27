@@ -1,0 +1,129 @@
+package jwtauth
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
+	jwt "github.com/dgrijalva/jwt-go"
+)
+
+// Context keys
+var (
+	TokenCtxKey = &contextKey{"Token"}
+	ErrorCtxKey = &contextKey{"Error"}
+)
+
+// TokenFromCookie tries to retreive the token string from a cookie named
+// "jwt".
+func TokenFromCookie(r *http.Request) string {
+	cookie, err := r.Cookie("jwt")
+	if err != nil {
+		return ""
+	}
+	return cookie.Value
+}
+
+// TokenFromHeader tries to retreive the token string from the
+// "Authorization" reqeust header: "Authorization: BEARER T".
+func TokenFromHeader(r *http.Request) string {
+	// Get token from authorization header.
+	bearer := r.Header.Get("Authorization")
+	if len(bearer) > 7 && strings.ToUpper(bearer[0:6]) == "BEARER" {
+		return bearer[7:]
+	}
+	return ""
+}
+
+// TokenFromQuery tries to retreive the token string from the "jwt" URI
+// query parameter.
+func TokenFromQuery(r *http.Request) string {
+	// Get token from query param named "jwt".
+	return r.URL.Query().Get("jwt")
+}
+
+func FromContext(ctx context.Context) (*jwt.Token, jwt.MapClaims, error) {
+	token, _ := ctx.Value(TokenCtxKey).(*jwt.Token)
+
+	var claims jwt.MapClaims
+	if token != nil {
+		if tokenClaims, ok := token.Claims.(jwt.MapClaims); ok {
+			claims = tokenClaims
+		} else {
+			panic(fmt.Sprintf("jwtauth: unknown type of Claims: %T", token.Claims))
+		}
+	} else {
+		claims = jwt.MapClaims{}
+	}
+
+	err, _ := ctx.Value(ErrorCtxKey).(error)
+
+	return token, claims, err
+}
+
+// UnixTime returns the given time in UTC milliseconds
+func UnixTime(tm time.Time) int64 {
+	return tm.UTC().Unix()
+}
+
+// EpochNow is a helper function that returns the NumericDate time value used by the spec
+func EpochNow() int64 {
+	return time.Now().UTC().Unix()
+}
+
+// ExpireIn is a helper function to return calculated time in the future for "exp" claim
+func ExpireIn(tm time.Duration) int64 {
+	return EpochNow() + int64(tm.Seconds())
+}
+
+// SetIssuedAt issued at ("iat") to specified time in the claims
+func SetIssuedAt(claims jwt.MapClaims, tm time.Time) {
+	claims["iat"] = tm.UTC().Unix()
+}
+
+// SetIssuedNow issued at ("iat") to present time in the claims
+func SetIssuedNow(claims jwt.MapClaims) {
+	claims["iat"] = EpochNow()
+}
+
+// SetExpiry expiry ("exp") in the claims
+func SetExpiry(claims jwt.MapClaims, tm time.Time) {
+	claims["exp"] = tm.UTC().Unix()
+}
+
+// SetExpiryIn expiry ("exp") in the claims to some duration from the present time
+func SetExpiryIn(claims jwt.MapClaims, tm time.Duration) {
+	claims["exp"] = ExpireIn(tm)
+}
+
+func (ja *JWTAuth) keyFunc(t *jwt.Token) (interface{}, error) {
+	if ja.verifyKey != nil {
+		return ja.verifyKey, nil
+	} else {
+		return ja.signKey, nil
+	}
+}
+
+func (ja *JWTAuth) Encode(claims jwt.Claims) (t *jwt.Token, tokenString string, err error) {
+	t = jwt.New(ja.signer)
+	t.Claims = claims
+	tokenString, err = t.SignedString(ja.signKey)
+	t.Raw = tokenString
+	return
+}
+
+func (ja *JWTAuth) Decode(tokenString string) (t *jwt.Token, err error) {
+	t, err = ja.parser.Parse(tokenString, ja.keyFunc)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func NewContext(ctx context.Context, t *jwt.Token, err error) context.Context {
+	ctx = context.WithValue(ctx, TokenCtxKey, t)
+	ctx = context.WithValue(ctx, ErrorCtxKey, err)
+	return ctx
+}

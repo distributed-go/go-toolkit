@@ -2,12 +2,6 @@ package jwtauth
 
 import "errors"
 
-// Context keys
-var (
-	TokenCtxKey = &contextKey{"Token"}
-	ErrorCtxKey = &contextKey{"Error"}
-)
-
 // Library errors
 var (
 	ErrUnauthorized = errors.New("jwtauth: token is unauthorized")
