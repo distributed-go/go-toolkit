@@ -47,7 +47,7 @@ func (ja *jwtAuth) Authenticator(next http.Handler) http.Handler {
 // http response.
 func (ja *jwtAuth) Verifier() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return ja.verify(TokenFromQuery, TokenFromHeader, TokenFromCookie)(next)
+		return ja.verify(ja.TokenFromQuery, ja.TokenFromHeader, ja.TokenFromCookie)(next)
 	}
 }
 

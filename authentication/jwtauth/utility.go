@@ -10,7 +10,7 @@ import (
 
 // TokenFromCookie tries to retreive the token string from a cookie named
 // "jwt".
-func TokenFromCookie(r *http.Request) string {
+func (ja *jwtAuth) TokenFromCookie(r *http.Request) string {
 	cookie, err := r.Cookie("jwt")
 	if err != nil {
 		return ""
@@ -20,7 +20,7 @@ func TokenFromCookie(r *http.Request) string {
 
 // TokenFromHeader tries to retreive the token string from the
 // "Authorization" reqeust header: "Authorization: BEARER T".
-func TokenFromHeader(r *http.Request) string {
+func (ja *jwtAuth) TokenFromHeader(r *http.Request) string {
 	// Get token from authorization header.
 	bearer := r.Header.Get("Authorization")
 	if len(bearer) > 7 && strings.ToUpper(bearer[0:6]) == "BEARER" {
@@ -31,7 +31,7 @@ func TokenFromHeader(r *http.Request) string {
 
 // TokenFromQuery tries to retreive the token string from the "jwt" URI
 // query parameter.
-func TokenFromQuery(r *http.Request) string {
+func (ja *jwtAuth) TokenFromQuery(r *http.Request) string {
 	// Get token from query param named "jwt".
 	return r.URL.Query().Get("jwt")
 }
