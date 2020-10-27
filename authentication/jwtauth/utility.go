@@ -1,19 +1,11 @@
 package jwtauth
 
 import (
-	"context"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-)
-
-// Context keys
-var (
-	TokenCtxKey = &contextKey{"Token"}
-	ErrorCtxKey = &contextKey{"Error"}
 )
 
 // TokenFromCookie tries to retreive the token string from a cookie named
@@ -42,25 +34,6 @@ func TokenFromHeader(r *http.Request) string {
 func TokenFromQuery(r *http.Request) string {
 	// Get token from query param named "jwt".
 	return r.URL.Query().Get("jwt")
-}
-
-func FromContext(ctx context.Context) (*jwt.Token, jwt.MapClaims, error) {
-	token, _ := ctx.Value(TokenCtxKey).(*jwt.Token)
-
-	var claims jwt.MapClaims
-	if token != nil {
-		if tokenClaims, ok := token.Claims.(jwt.MapClaims); ok {
-			claims = tokenClaims
-		} else {
-			panic(fmt.Sprintf("jwtauth: unknown type of Claims: %T", token.Claims))
-		}
-	} else {
-		claims = jwt.MapClaims{}
-	}
-
-	err, _ := ctx.Value(ErrorCtxKey).(error)
-
-	return token, claims, err
 }
 
 // UnixTime returns the given time in UTC milliseconds
@@ -120,10 +93,4 @@ func (ja *jwtAuth) Decode(tokenString string) (t *jwt.Token, err error) {
 		return nil, err
 	}
 	return
-}
-
-func NewContext(ctx context.Context, t *jwt.Token, err error) context.Context {
-	ctx = context.WithValue(ctx, TokenCtxKey, t)
-	ctx = context.WithValue(ctx, ErrorCtxKey, err)
-	return ctx
 }

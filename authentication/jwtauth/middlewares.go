@@ -12,7 +12,7 @@ import (
 // until you decide to write something similar and customize your client response.
 func Authenticator(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, _, err := FromContext(r.Context())
+		token, _, err := TokenFromContext(r.Context())
 
 		if err != nil {
 			http.Error(w, http.StatusText(401), 401)
