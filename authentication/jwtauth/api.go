@@ -2,13 +2,34 @@ package jwtauth
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
+// Library errors
+var (
+	ErrUnauthorized = errors.New("jwtauth: token is unauthorized")
+	ErrExpired      = errors.New("jwtauth: token is expired")
+	ErrNBFInvalid   = errors.New("jwtauth: token nbf validation failed")
+	ErrIATInvalid   = errors.New("jwtauth: token iat validation failed")
+	ErrNoTokenFound = errors.New("jwtauth: no token found")
+	ErrAlgoInvalid  = errors.New("jwtauth: algorithm mismatch")
+)
+
+// Context keys
+var (
+	TokenCtxKey = &contextKey{"Token"}
+	ErrorCtxKey = &contextKey{"Error"}
+)
+
 // JWTAuth implements the JWTAuth methods
 type JWTAuth interface {
+	// Middlewares for validating JWT tokens
+	Authenticate(next http.Handler) http.Handler
+	Verify() func(http.Handler) http.Handler
+
 	// Functions to extract tokens from http request
 	TokenFromCookie(r *http.Request) string
 	TokenFromHeader(r *http.Request) string

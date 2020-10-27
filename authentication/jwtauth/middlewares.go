@@ -6,11 +6,11 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-// Authenticator is a default authentication middleware to enforce access from the
-// Verifier middleware request context values. The Authenticator sends a 401 Unauthorized
+// Authenticate is a default authentication middleware to enforce access from the
+// Verifier middleware request context values. The Authenticate sends a 401 Unauthorized
 // response for any unverified tokens and passes the good ones through. It's just fine
 // until you decide to write something similar and customize your client response.
-func (ja *jwtAuth) Authenticator(next http.Handler) http.Handler {
+func (ja *jwtAuth) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token, _, err := ja.TokenFromContext(r.Context())
 
@@ -29,9 +29,9 @@ func (ja *jwtAuth) Authenticator(next http.Handler) http.Handler {
 	})
 }
 
-// Verifier http middleware handler will verify a JWT string from a http request.
+// Verify http middleware handler will verify a JWT string from a http request.
 //
-// Verifier will search for a JWT token in a http request, in the order:
+// Verify will search for a JWT token in a http request, in the order:
 //   1. 'jwt' URI query parameter
 //   2. 'Authorization: BEARER T' request header
 //   3. Cookie 'jwt' value
@@ -39,13 +39,13 @@ func (ja *jwtAuth) Authenticator(next http.Handler) http.Handler {
 // The first JWT string that is found as a query parameter, authorization header
 // or cookie header is then decoded by the `jwt-go` library and a *jwt.Token
 // object is set on the request context. In the case of a signature decoding error
-// the Verifier will also set the error on the request context.
+// the Verify will also set the error on the request context.
 //
-// The Verifier always calls the next http handler in sequence, which can either
-// be the generic `jwtauth.Authenticator` middleware or your own custom handler
+// The Verify always calls the next http handler in sequence, which can either
+// be the generic `jwtauth.Authenticate` middleware or your own custom handler
 // which checks the request context jwt token and error to prepare a custom
 // http response.
-func (ja *jwtAuth) Verifier() func(http.Handler) http.Handler {
+func (ja *jwtAuth) Verify() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return ja.verify(ja.TokenFromQuery, ja.TokenFromHeader, ja.TokenFromCookie)(next)
 	}
@@ -55,7 +55,7 @@ func (ja *jwtAuth) verify(findTokenFns ...func(r *http.Request) string) func(htt
 	return func(next http.Handler) http.Handler {
 		hfn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			token, err := VerifyRequest(ja, r, findTokenFns...)
+			token, err := ja.verifyRequest(r, findTokenFns...)
 			ctx = ja.NewContext(ctx, token, err)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
@@ -63,7 +63,7 @@ func (ja *jwtAuth) verify(findTokenFns ...func(r *http.Request) string) func(htt
 	}
 }
 
-func VerifyRequest(ja *jwtAuth, r *http.Request, findTokenFns ...func(r *http.Request) string) (*jwt.Token, error) {
+func (ja *jwtAuth) verifyRequest(r *http.Request, findTokenFns ...func(r *http.Request) string) (*jwt.Token, error) {
 	var tokenStr string
 	var err error
 

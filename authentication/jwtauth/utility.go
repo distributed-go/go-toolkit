@@ -19,7 +19,7 @@ func (ja *jwtAuth) TokenFromCookie(r *http.Request) string {
 }
 
 // TokenFromHeader tries to retreive the token string from the
-// "Authorization" reqeust header: "Authorization: BEARER T".
+// "Authorization" request header: "Authorization: BEARER T".
 func (ja *jwtAuth) TokenFromHeader(r *http.Request) string {
 	// Get token from authorization header.
 	bearer := r.Header.Get("Authorization")
@@ -37,38 +37,38 @@ func (ja *jwtAuth) TokenFromQuery(r *http.Request) string {
 }
 
 // UnixTime returns the given time in UTC milliseconds
-func UnixTime(tm time.Time) int64 {
+func unixTime(tm time.Time) int64 {
 	return tm.UTC().Unix()
 }
 
 // EpochNow is a helper function that returns the NumericDate time value used by the spec
-func EpochNow() int64 {
+func epochNow() int64 {
 	return time.Now().UTC().Unix()
 }
 
 // ExpireIn is a helper function to return calculated time in the future for "exp" claim
-func ExpireIn(tm time.Duration) int64 {
-	return EpochNow() + int64(tm.Seconds())
+func expireIn(tm time.Duration) int64 {
+	return epochNow() + int64(tm.Seconds())
 }
 
 // SetIssuedAt issued at ("iat") to specified time in the claims
-func SetIssuedAt(claims jwt.MapClaims, tm time.Time) {
+func setIssuedAt(claims jwt.MapClaims, tm time.Time) {
 	claims["iat"] = tm.UTC().Unix()
 }
 
 // SetIssuedNow issued at ("iat") to present time in the claims
-func SetIssuedNow(claims jwt.MapClaims) {
-	claims["iat"] = EpochNow()
+func setIssuedNow(claims jwt.MapClaims) {
+	claims["iat"] = epochNow()
 }
 
 // SetExpiry expiry ("exp") in the claims
-func SetExpiry(claims jwt.MapClaims, tm time.Time) {
+func setExpiry(claims jwt.MapClaims, tm time.Time) {
 	claims["exp"] = tm.UTC().Unix()
 }
 
 // SetExpiryIn expiry ("exp") in the claims to some duration from the present time
-func SetExpiryIn(claims jwt.MapClaims, tm time.Duration) {
-	claims["exp"] = ExpireIn(tm)
+func setExpiryIn(claims jwt.MapClaims, tm time.Duration) {
+	claims["exp"] = expireIn(tm)
 }
 
 func (ja *jwtAuth) keyFunc(t *jwt.Token) (interface{}, error) {

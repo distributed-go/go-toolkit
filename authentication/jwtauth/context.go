@@ -18,12 +18,6 @@ func (k *contextKey) String() string {
 	return "jwtauth context value " + k.name
 }
 
-// Context keys
-var (
-	TokenCtxKey = &contextKey{"Token"}
-	ErrorCtxKey = &contextKey{"Error"}
-)
-
 // TokenFromContext extracts the JWT token from the request context
 func (ja *jwtAuth) TokenFromContext(ctx context.Context) (*jwt.Token, jwt.MapClaims, error) {
 	token, _ := ctx.Value(TokenCtxKey).(*jwt.Token)
