@@ -15,7 +15,7 @@ type jwtAuth struct {
 // and encoding/decoding functions for JWT signing.
 // *jwt.Parser is custom parser settings introduced in jwt-go/v2.4.0.
 func NewJWTAuth(alg string, parser *jwt.Parser, signKey interface{}, verifyKey interface{}) JWTAuth {
-	return jwtAuth{
+	return &jwtAuth{
 		signKey:   signKey,
 		verifyKey: verifyKey,
 		signer:    jwt.GetSigningMethod(alg),

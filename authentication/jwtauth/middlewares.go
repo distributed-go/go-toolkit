@@ -10,9 +10,9 @@ import (
 // Verifier middleware request context values. The Authenticator sends a 401 Unauthorized
 // response for any unverified tokens and passes the good ones through. It's just fine
 // until you decide to write something similar and customize your client response.
-func Authenticator(next http.Handler) http.Handler {
+func (ja *jwtAuth) Authenticator(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, _, err := TokenFromContext(r.Context())
+		token, _, err := ja.TokenFromContext(r.Context())
 
 		if err != nil {
 			http.Error(w, http.StatusText(401), 401)
@@ -45,18 +45,18 @@ func Authenticator(next http.Handler) http.Handler {
 // be the generic `jwtauth.Authenticator` middleware or your own custom handler
 // which checks the request context jwt token and error to prepare a custom
 // http response.
-func Verifier(ja *jwtAuth) func(http.Handler) http.Handler {
+func (ja *jwtAuth) Verifier() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return Verify(ja, TokenFromQuery, TokenFromHeader, TokenFromCookie)(next)
+		return ja.verify(TokenFromQuery, TokenFromHeader, TokenFromCookie)(next)
 	}
 }
 
-func Verify(ja *jwtAuth, findTokenFns ...func(r *http.Request) string) func(http.Handler) http.Handler {
+func (ja *jwtAuth) verify(findTokenFns ...func(r *http.Request) string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hfn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 			token, err := VerifyRequest(ja, r, findTokenFns...)
-			ctx = NewContext(ctx, token, err)
+			ctx = ja.NewContext(ctx, token, err)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 		return http.HandlerFunc(hfn)

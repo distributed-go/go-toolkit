@@ -25,7 +25,7 @@ var (
 )
 
 // TokenFromContext extracts the JWT token from the request context
-func TokenFromContext(ctx context.Context) (*jwt.Token, jwt.MapClaims, error) {
+func (ja *jwtAuth) TokenFromContext(ctx context.Context) (*jwt.Token, jwt.MapClaims, error) {
 	token, _ := ctx.Value(TokenCtxKey).(*jwt.Token)
 
 	var claims jwt.MapClaims
@@ -45,7 +45,7 @@ func TokenFromContext(ctx context.Context) (*jwt.Token, jwt.MapClaims, error) {
 }
 
 // NewContext creates a new context with JWT token and error
-func NewContext(ctx context.Context, t *jwt.Token, err error) context.Context {
+func (ja *jwtAuth) NewContext(ctx context.Context, t *jwt.Token, err error) context.Context {
 	ctx = context.WithValue(ctx, TokenCtxKey, t)
 	ctx = context.WithValue(ctx, ErrorCtxKey, err)
 	return ctx
