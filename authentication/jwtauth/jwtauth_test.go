@@ -1,11 +1,14 @@
 package jwtauth_test
 
 import (
+	"crypto/x509"
+	"encoding/pem"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -14,9 +17,7 @@ import (
 )
 
 var (
-	TokenAuthHS256 jwtauth.JWTAuth
-	TokenAuthRS256 jwtauth.JWTAuth
-	TokenSecret    = []byte("secretpass")
+	TokenSecret = []byte("secretpass")
 
 	PrivateKeyRS256String = `-----BEGIN RSA PRIVATE KEY-----
 MIIBOwIBAAJBALxo3PCjFw4QjgOX06QCJIJBnXXNiEYwDLxxa5/7QyH6y77nCRQy
@@ -36,62 +37,50 @@ DLxxa5/7QyH6y77nCRQyJ3x3UwF9rUD0RCsp4sNdX5kOQ9PUyHyOtCUCAwEAAQ==
 `
 )
 
-func init() {
-	TokenAuthHS256 = jwtauth.NewJWTAuth("HS256", &jwt.Parser{}, TokenSecret, nil)
-	TokenAuthRS256 = jwtauth.NewJWTAuth("RS256", &jwt.Parser{}, TokenSecret, nil)
-}
-
 //
 // Tests
 //
 
-// func TestSimpleRSA(t *testing.T) {
-// 	privateKeyBlock, _ := pem.Decode([]byte(PrivateKeyRS256String))
+func TestSimpleRSA(t *testing.T) {
+	privateKeyBlock, _ := pem.Decode([]byte(PrivateKeyRS256String))
+	privateKey, err := x509.ParsePKCS1PrivateKey(privateKeyBlock.Bytes)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 
-// 	privateKey, err := x509.ParsePKCS1PrivateKey(privateKeyBlock.Bytes)
+	publicKeyBlock, _ := pem.Decode([]byte(PublicKeyRS256String))
+	publicKey, err := x509.ParsePKIXPublicKey(publicKeyBlock.Bytes)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 
-// 	if err != nil {
-// 		t.Fatalf(err.Error())
-// 	}
+	TokenAuthRS256 := jwtauth.NewJWTAuth("RS256", &jwt.Parser{}, privateKey, publicKey)
+	claims := jwt.MapClaims{
+		"key":  "val",
+		"key2": "val2",
+		"key3": "val3",
+	}
 
-// 	publicKeyBlock, _ := pem.Decode([]byte(PublicKeyRS256String))
+	_, tokenString, err := TokenAuthRS256.Encode(claims)
+	if err != nil {
+		t.Fatalf("Failed to encode claims %s\n", err.Error())
+	}
 
-// 	publicKey, err := x509.ParsePKIXPublicKey(publicKeyBlock.Bytes)
+	token, err := TokenAuthRS256.Decode(tokenString)
+	if err != nil {
+		t.Fatalf("Failed to decode token string %s\n", err.Error())
+	}
 
-// 	if err != nil {
-// 		t.Fatalf(err.Error())
-// 	}
-
-//
-
-// 	claims := jwt.MapClaims{
-// 		"key":  "val",
-// 		"key2": "val2",
-// 		"key3": "val3",
-// 	}
-
-// 	_, tokenString, err := TokenAuthRS256.Encode(claims)
-
-// 	if err != nil {
-// 		t.Fatalf("Failed to encode claims %s\n", err.Error())
-// 	}
-
-// 	token, err := TokenAuthRS256.Decode(tokenString)
-
-// 	if err != nil {
-// 		t.Fatalf("Failed to decode token string %s\n", err.Error())
-// 	}
-
-// 	if !reflect.DeepEqual(claims, jwt.MapClaims(token.Claims.(jwt.MapClaims))) {
-// 		t.Fatalf("The decoded claims don't match the original ones\n")
-// 	}
-// }
+	if !reflect.DeepEqual(claims, jwt.MapClaims(token.Claims.(jwt.MapClaims))) {
+		t.Fatalf("The decoded claims don't match the original ones\n")
+	}
+}
 
 func TestSimple(t *testing.T) {
+	TokenAuthHS256 := jwtauth.NewJWTAuth("HS256", &jwt.Parser{}, TokenSecret, nil)
+
 	r := chi.NewRouter()
-
 	r.Use(TokenAuthHS256.Verify(), TokenAuthHS256.Authenticate)
-
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("welcome"))
 	})
