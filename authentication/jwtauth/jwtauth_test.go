@@ -1,4 +1,4 @@
-package jwtauth_test
+package jwtauth
 
 import (
 	"crypto/x509"
@@ -15,7 +15,6 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
-	"github.com/golang-microservices/go-microservice-toolkit/authentication/jwtauth"
 )
 
 var (
@@ -56,7 +55,7 @@ func TestSimpleRSA(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	TokenAuthRS256 := jwtauth.NewJWTAuth("RS256", &jwt.Parser{}, privateKey, publicKey)
+	TokenAuthRS256 := NewJWTAuth("RS256", &jwt.Parser{}, privateKey, publicKey)
 	claims := jwt.MapClaims{
 		"key":  "val",
 		"key2": "val2",
@@ -79,7 +78,7 @@ func TestSimpleRSA(t *testing.T) {
 }
 
 func TestSimple(t *testing.T) {
-	TokenAuthHS256 := jwtauth.NewJWTAuth("HS256", &jwt.Parser{}, TokenSecret, nil)
+	TokenAuthHS256 := NewJWTAuth("HS256", &jwt.Parser{}, TokenSecret, nil)
 
 	r := chi.NewRouter()
 	r.Use(TokenAuthHS256.Verify(), TokenAuthHS256.Authenticate)
@@ -122,7 +121,7 @@ func TestSimple(t *testing.T) {
 }
 
 func TestMore(t *testing.T) {
-	TokenAuthHS256 := jwtauth.NewJWTAuth("HS256", &jwt.Parser{}, TokenSecret, nil)
+	TokenAuthHS256 := NewJWTAuth("HS256", &jwt.Parser{}, TokenSecret, nil)
 
 	r := chi.NewRouter()
 
@@ -139,10 +138,10 @@ func TestMore(t *testing.T) {
 					default:
 						http.Error(w, http.StatusText(401), 401)
 						return
-					case jwtauth.ErrExpired:
+					case ErrExpired:
 						http.Error(w, "expired", 401)
 						return
-					case jwtauth.ErrUnauthorized:
+					case ErrUnauthorized:
 						http.Error(w, http.StatusText(401), 401)
 						return
 					case nil:
