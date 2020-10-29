@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -42,4 +43,11 @@ type JWTAuth interface {
 	// Functions to work with context
 	TokenFromContext(ctx context.Context) (*jwt.Token, jwt.MapClaims, error)
 	NewContext(ctx context.Context, t *jwt.Token, err error) context.Context
+
+	// Utility functions for setting token expiry
+	ExpireIn(tm time.Duration) int64
+	SetIssuedAt(claims jwt.MapClaims, tm time.Time)
+	SetIssuedNow(claims jwt.MapClaims)
+	SetExpiry(claims jwt.MapClaims, tm time.Time)
+	SetExpiryIn(claims jwt.MapClaims, tm time.Duration)
 }

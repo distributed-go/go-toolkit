@@ -47,28 +47,28 @@ func epochNow() int64 {
 }
 
 // ExpireIn is a helper function to return calculated time in the future for "exp" claim
-func expireIn(tm time.Duration) int64 {
+func (ja *jwtAuth) ExpireIn(tm time.Duration) int64 {
 	return epochNow() + int64(tm.Seconds())
 }
 
 // SetIssuedAt issued at ("iat") to specified time in the claims
-func setIssuedAt(claims jwt.MapClaims, tm time.Time) {
+func (ja *jwtAuth) SetIssuedAt(claims jwt.MapClaims, tm time.Time) {
 	claims["iat"] = tm.UTC().Unix()
 }
 
 // SetIssuedNow issued at ("iat") to present time in the claims
-func setIssuedNow(claims jwt.MapClaims) {
+func (ja *jwtAuth) SetIssuedNow(claims jwt.MapClaims) {
 	claims["iat"] = epochNow()
 }
 
 // SetExpiry expiry ("exp") in the claims
-func setExpiry(claims jwt.MapClaims, tm time.Time) {
+func (ja *jwtAuth) SetExpiry(claims jwt.MapClaims, tm time.Time) {
 	claims["exp"] = tm.UTC().Unix()
 }
 
 // SetExpiryIn expiry ("exp") in the claims to some duration from the present time
-func setExpiryIn(claims jwt.MapClaims, tm time.Duration) {
-	claims["exp"] = expireIn(tm)
+func (ja *jwtAuth) SetExpiryIn(claims jwt.MapClaims, tm time.Duration) {
+	claims["exp"] = ja.ExpireIn(tm)
 }
 
 func (ja *jwtAuth) keyFunc(t *jwt.Token) (interface{}, error) {

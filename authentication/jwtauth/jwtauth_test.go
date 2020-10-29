@@ -3,6 +3,7 @@ package jwtauth_test
 import (
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
@@ -119,106 +121,108 @@ func TestSimple(t *testing.T) {
 	}
 }
 
-// func TestMore(t *testing.T) {
-// 	r := chi.NewRouter()
+func TestMore(t *testing.T) {
+	TokenAuthHS256 := jwtauth.NewJWTAuth("HS256", &jwt.Parser{}, TokenSecret, nil)
 
-// 	// Protected routes
-// 	r.Group(func(r chi.Router) {
-// 		r.Use(jwtauth.Verifier(TokenAuthHS256))
+	r := chi.NewRouter()
 
-// 		authenticator := func(next http.Handler) http.Handler {
-// 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 				token, _, err := jwtauth.FromContext(r.Context())
+	// Protected routes
+	r.Group(func(r chi.Router) {
+		r.Use(TokenAuthHS256.Verify())
 
-// 				if err != nil {
-// 					switch err {
-// 					default:
-// 						http.Error(w, http.StatusText(401), 401)
-// 						return
-// 					case jwtauth.ErrExpired:
-// 						http.Error(w, "expired", 401)
-// 						return
-// 					case jwtauth.ErrUnauthorized:
-// 						http.Error(w, http.StatusText(401), 401)
-// 						return
-// 					case nil:
-// 						// no error
-// 					}
-// 				}
+		authenticator := func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				token, _, err := TokenAuthHS256.TokenFromContext(r.Context())
 
-// 				if token == nil || !token.Valid {
-// 					http.Error(w, http.StatusText(401), 401)
-// 					return
-// 				}
+				if err != nil {
+					switch err {
+					default:
+						http.Error(w, http.StatusText(401), 401)
+						return
+					case jwtauth.ErrExpired:
+						http.Error(w, "expired", 401)
+						return
+					case jwtauth.ErrUnauthorized:
+						http.Error(w, http.StatusText(401), 401)
+						return
+					case nil:
+						// no error
+					}
+				}
 
-// 				// Token is authenticated, pass it through
-// 				next.ServeHTTP(w, r)
-// 			})
-// 		}
-// 		r.Use(authenticator)
+				if token == nil || !token.Valid {
+					http.Error(w, http.StatusText(401), 401)
+					return
+				}
 
-// 		r.Get("/admin", func(w http.ResponseWriter, r *http.Request) {
-// 			_, claims, err := jwtauth.FromContext(r.Context())
+				// Token is authenticated, pass it through
+				next.ServeHTTP(w, r)
+			})
+		}
+		r.Use(authenticator)
 
-// 			if err != nil {
-// 				w.Write([]byte(fmt.Sprintf("error! %v", err)))
-// 				return
-// 			}
+		r.Get("/admin", func(w http.ResponseWriter, r *http.Request) {
+			_, claims, err := TokenAuthHS256.TokenFromContext(r.Context())
 
-// 			w.Write([]byte(fmt.Sprintf("protected, user:%v", claims["user_id"])))
-// 		})
-// 	})
+			if err != nil {
+				w.Write([]byte(fmt.Sprintf("error! %v", err)))
+				return
+			}
 
-// 	// Public routes
-// 	r.Group(func(r chi.Router) {
-// 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-// 			w.Write([]byte("welcome"))
-// 		})
-// 	})
+			w.Write([]byte(fmt.Sprintf("protected, user:%v", claims["user_id"])))
+		})
+	})
 
-// 	ts := httptest.NewServer(r)
-// 	defer ts.Close()
+	// Public routes
+	r.Group(func(r chi.Router) {
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("welcome"))
+		})
+	})
 
-// 	// sending unauthorized requests
-// 	if status, resp := testRequest(t, ts, "GET", "/admin", nil, nil); status != 401 || resp != "Unauthorized\n" {
-// 		t.Fatalf(resp)
-// 	}
+	ts := httptest.NewServer(r)
+	defer ts.Close()
 
-// 	h := http.Header{}
-// 	h.Set("Authorization", "BEARER "+newJwtToken([]byte("wrong"), map[string]interface{}{}))
-// 	if status, resp := testRequest(t, ts, "GET", "/admin", h, nil); status != 401 || resp != "Unauthorized\n" {
-// 		t.Fatalf(resp)
-// 	}
-// 	h.Set("Authorization", "BEARER asdf")
-// 	if status, resp := testRequest(t, ts, "GET", "/admin", h, nil); status != 401 || resp != "Unauthorized\n" {
-// 		t.Fatalf(resp)
-// 	}
-// 	// wrong token secret and wrong alg
-// 	h.Set("Authorization", "BEARER "+newJwt512Token([]byte("wrong"), map[string]interface{}{}))
-// 	if status, resp := testRequest(t, ts, "GET", "/admin", h, nil); status != 401 || resp != "Unauthorized\n" {
-// 		t.Fatalf(resp)
-// 	}
-// 	// correct token secret but wrong alg
-// 	h.Set("Authorization", "BEARER "+newJwt512Token(TokenSecret, map[string]interface{}{}))
-// 	if status, resp := testRequest(t, ts, "GET", "/admin", h, nil); status != 401 || resp != "Unauthorized\n" {
-// 		t.Fatalf(resp)
-// 	}
+	// sending unauthorized requests
+	if status, resp := testRequest(t, ts, "GET", "/admin", nil, nil); status != 401 || resp != "Unauthorized\n" {
+		t.Fatalf(resp)
+	}
 
-// 	h = newAuthHeader(jwt.MapClaims{"exp": jwtauth.EpochNow() - 1000})
-// 	if status, resp := testRequest(t, ts, "GET", "/admin", h, nil); status != 401 || resp != "expired\n" {
-// 		t.Fatalf(resp)
-// 	}
+	h := http.Header{}
+	h.Set("Authorization", "BEARER "+newJwtToken([]byte("wrong"), map[string]interface{}{}))
+	if status, resp := testRequest(t, ts, "GET", "/admin", h, nil); status != 401 || resp != "Unauthorized\n" {
+		t.Fatalf(resp)
+	}
+	h.Set("Authorization", "BEARER asdf")
+	if status, resp := testRequest(t, ts, "GET", "/admin", h, nil); status != 401 || resp != "Unauthorized\n" {
+		t.Fatalf(resp)
+	}
+	// wrong token secret and wrong alg
+	h.Set("Authorization", "BEARER "+newJwt512Token([]byte("wrong"), map[string]interface{}{}))
+	if status, resp := testRequest(t, ts, "GET", "/admin", h, nil); status != 401 || resp != "Unauthorized\n" {
+		t.Fatalf(resp)
+	}
+	// correct token secret but wrong alg
+	h.Set("Authorization", "BEARER "+newJwt512Token(TokenSecret, map[string]interface{}{}))
+	if status, resp := testRequest(t, ts, "GET", "/admin", h, nil); status != 401 || resp != "Unauthorized\n" {
+		t.Fatalf(resp)
+	}
 
-// 	// sending authorized requests
-// 	if status, resp := testRequest(t, ts, "GET", "/", nil, nil); status != 200 || resp != "welcome" {
-// 		t.Fatalf(resp)
-// 	}
+	h = newAuthHeader(jwt.MapClaims{"exp": time.Now().UTC().Unix() - 1000})
+	if status, resp := testRequest(t, ts, "GET", "/admin", h, nil); status != 401 || resp != "expired\n" {
+		t.Fatalf(resp)
+	}
 
-// 	h = newAuthHeader((jwt.MapClaims{"user_id": 31337, "exp": jwtauth.ExpireIn(5 * time.Minute)}))
-// 	if status, resp := testRequest(t, ts, "GET", "/admin", h, nil); status != 200 || resp != "protected, user:31337" {
-// 		t.Fatalf(resp)
-// 	}
-// }
+	// sending authorized requests
+	if status, resp := testRequest(t, ts, "GET", "/", nil, nil); status != 200 || resp != "welcome" {
+		t.Fatalf(resp)
+	}
+
+	h = newAuthHeader((jwt.MapClaims{"user_id": 31337, "exp": TokenAuthHS256.ExpireIn(5 * time.Minute)}))
+	if status, resp := testRequest(t, ts, "GET", "/admin", h, nil); status != 200 || resp != "protected, user:31337" {
+		t.Fatalf(resp)
+	}
+}
 
 //
 // Test helper functions
