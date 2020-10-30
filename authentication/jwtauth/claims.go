@@ -16,6 +16,13 @@ type AppClaims struct {
 	jwt.StandardClaims
 }
 
+// RefreshClaims represents the claims parsed from JWT refresh token.
+type RefreshClaims struct {
+	ID        string `json:"ID,omitempty"`
+	TokenUUID string `json:"TokenUUID,omitempty"`
+	jwt.StandardClaims
+}
+
 // ParseClaims parses JWT claims into AppClaims.
 func (c *AppClaims) ParseClaims(claims jwt.MapClaims) error {
 	// parse ID
@@ -46,5 +53,23 @@ func (c *AppClaims) ParseClaims(claims jwt.MapClaims) error {
 	}
 	c.Roles = roles
 
+	return nil
+}
+
+// ParseClaims parses the JWT claims into RefreshClaims.
+func (c *RefreshClaims) ParseClaims(claims jwt.MapClaims) error {
+	// parse ID
+	id, ok := claims["ID"]
+	if !ok {
+		return errors.New("could not parse claim id")
+	}
+	c.ID = id.(string)
+
+	// parse Token
+	token, ok := claims["TokenUUID"]
+	if !ok {
+		return errors.New("could not parse token uuid")
+	}
+	c.TokenUUID = token.(string)
 	return nil
 }
