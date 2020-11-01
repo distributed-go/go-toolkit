@@ -6,13 +6,24 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+// Role defines a perticular user role
 type Role string
 
 // AppClaims represent the claims parsed from JWT access token.
 type AppClaims struct {
-	ID    string `json:"ID,omitempty"`
-	Sub   string `json:"Sub,omitempty"`
-	Roles []Role `json:"Roles,omitempty"`
+	// ID for the account
+	UserID string `json:"uid,omitempty"`
+	// Name of the account e.g. an email or username
+	Name string `json:"name,omitempty"`
+	// Roles the account has access too
+	Roles []Role `json:"roles,omitempty"`
+	// Type of the account, e.g. user
+	Type string `json:"type,omitempty"`
+	// Metadata associated with the account
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	// Provider of the account, e.g. oauth
+	Provider string `json:"provider,omitempty"`
+	// https://tools.ietf.org/html/rfc7519#section-4.1
 	jwt.StandardClaims
 }
 
@@ -25,19 +36,12 @@ type RefreshClaims struct {
 
 // ParseClaims parses JWT claims into AppClaims.
 func (c *AppClaims) ParseClaims(claims jwt.MapClaims) error {
-	// parse ID
-	id, ok := claims["ID"]
+	// parse UserID
+	id, ok := claims["UserID"]
 	if !ok {
-		return errors.New("could not parse claim id")
+		return errors.New("could not parse user id")
 	}
-	c.ID = id.(string)
-
-	// parse Sub
-	sub, ok := claims["Sub"]
-	if !ok {
-		return errors.New("could not parse claim sub")
-	}
-	c.Sub = sub.(string)
+	c.UserID = id.(string)
 
 	// parse Roles
 	rl, ok := claims["Roles"]
