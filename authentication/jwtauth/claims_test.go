@@ -65,3 +65,57 @@ func TestAppClaims_ParseClaims(t *testing.T) {
 		})
 	}
 }
+
+func TestRefreshClaims_ParseClaims(t *testing.T) {
+	type fields struct {
+		UserID         string
+		Roles          []Role
+		Metadata       map[string]interface{}
+		StandardClaims jwt.StandardClaims
+	}
+	type args struct {
+		claims jwt.MapClaims
+	}
+	var userRole Role = "USER"
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Happy Path",
+			args: args{
+				claims: jwt.MapClaims{
+					"uid":   "123456",
+					"name":  "Mike",
+					"roles": []Role{userRole},
+					"type":  "Subscription",
+					"metadata": map[string]interface{}{
+						"userAgent": "Firefox",
+					},
+					"aud": "",
+					"exp": (time.Now().UTC().Unix() + 60),
+					"iat": time.Now().UTC().Unix(),
+					"jti": "4564-bgf5456-bgf4b564b5fg-454b65gfb",
+					"iss": "OAuth",
+					"nbf": time.Now().UTC().Unix(),
+					"sub": "JWT Authentication Token",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &RefreshClaims{
+				UserID:         tt.fields.UserID,
+				Roles:          tt.fields.Roles,
+				Metadata:       tt.fields.Metadata,
+				StandardClaims: tt.fields.StandardClaims,
+			}
+			if err := c.ParseClaims(tt.args.claims); (err != nil) != tt.wantErr {
+				t.Errorf("RefreshClaims.ParseClaims() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
