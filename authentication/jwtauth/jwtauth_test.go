@@ -55,7 +55,13 @@ func TestSimpleRSA(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	TokenAuthRS256 := NewJWTAuth("RS256", &jwt.Parser{}, privateKey, publicKey)
+	TokenAuthRS256 := NewJWTAuth(Config{
+		JwtAuthAlgo: "RS256",
+		JwtParser:   &jwt.Parser{},
+		SignKey:     privateKey,
+		VerifyKey:   publicKey,
+	})
+
 	claims := jwt.MapClaims{
 		"key":  "val",
 		"key2": "val2",
@@ -78,7 +84,11 @@ func TestSimpleRSA(t *testing.T) {
 }
 
 func TestSimple(t *testing.T) {
-	TokenAuthHS256 := NewJWTAuth("HS256", &jwt.Parser{}, TokenSecret, nil)
+	TokenAuthHS256 := NewJWTAuth(Config{
+		JwtAuthAlgo: "HS256",
+		JwtParser:   &jwt.Parser{},
+		SignKey:     TokenSecret,
+	})
 
 	r := chi.NewRouter()
 	r.Use(TokenAuthHS256.Verify(), TokenAuthHS256.Authenticate)
@@ -121,7 +131,11 @@ func TestSimple(t *testing.T) {
 }
 
 func TestMore(t *testing.T) {
-	TokenAuthHS256 := NewJWTAuth("HS256", &jwt.Parser{}, TokenSecret, nil)
+	TokenAuthHS256 := NewJWTAuth(Config{
+		JwtAuthAlgo: "HS256",
+		JwtParser:   &jwt.Parser{},
+		SignKey:     TokenSecret,
+	})
 
 	r := chi.NewRouter()
 
