@@ -6,37 +6,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-// Role defines a perticular user role
-type Role string
-
-// AppClaims represent the claims parsed from JWT access token.
-type AppClaims struct {
-	// ID for the account
-	UserID string `json:"uid,omitempty"`
-	// Name of the account e.g. an email or username
-	Name string `json:"name,omitempty"`
-	// Roles the account has access too
-	Roles []Role `json:"roles,omitempty"`
-	// Type of the account, e.g. user
-	Type string `json:"type,omitempty"`
-	// Metadata associated with the account
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
-	// https://tools.ietf.org/html/rfc7519#section-4.1
-	jwt.StandardClaims
-}
-
-// RefreshClaims represents the claims parsed from JWT refresh token.
-type RefreshClaims struct {
-	// ID for the account
-	UserID string `json:"uid,omitempty"`
-	// Roles the account has access too
-	Roles []Role `json:"roles,omitempty"`
-	// Metadata associated with the account
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
-	// https://tools.ietf.org/html/rfc7519#section-4.1
-	jwt.StandardClaims
-}
-
 // ParseClaims parses JWT claims into AppClaims.
 func (c *AppClaims) ParseClaims(claims jwt.MapClaims) error {
 	// parse UserID
