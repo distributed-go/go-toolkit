@@ -30,6 +30,11 @@ var (
 
 // JWTAuth implements the JWTAuth methods
 type JWTAuth interface {
+	// FUnctions to create JWTs
+	GenTokenPair(accessClaims *AppClaims, refreshClaims *RefreshClaims) (string, string, error)
+	CreateJWT(c *AppClaims) (string, error)
+	CreateRefreshJWT(c *RefreshClaims) (string, error)
+
 	// Middlewares for validating JWT tokens
 	Authenticate(next http.Handler) http.Handler
 	Verify() func(http.Handler) http.Handler
