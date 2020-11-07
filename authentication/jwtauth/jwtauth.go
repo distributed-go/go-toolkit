@@ -1,6 +1,7 @@
 package jwtauth
 
 import (
+	"fmt"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -30,20 +31,23 @@ func NewJWTAuth(config Config) JWTAuth {
 }
 
 // GenTokenPair returns both an access token and a refresh token.
-func (ja *jwtAuth) GenTokenPair(accessClaims *AppClaims, refreshClaims *RefreshClaims) (string, string, error) {
+func (ja *jwtAuth) GenTokenPair(accessClaims AppClaims, refreshClaims RefreshClaims) (string, string, error) {
 	access, err := ja.CreateJWT(accessClaims)
 	if err != nil {
+		fmt.Println(err, "access")
 		return "", "", err
 	}
 	refresh, err := ja.CreateRefreshJWT(refreshClaims)
 	if err != nil {
+		fmt.Println(err, "refresh")
+
 		return "", "", err
 	}
 	return access, refresh, nil
 }
 
 // CreateJWT returns an access token for provided account claims.
-func (ja *jwtAuth) CreateJWT(c *AppClaims) (string, error) {
+func (ja *jwtAuth) CreateJWT(c AppClaims) (string, error) {
 	c.IssuedAt = time.Now().Unix()
 	c.ExpiresAt = time.Now().Add(ja.jwtExpiry).Unix()
 	_, tokenString, err := ja.Encode(c)
@@ -51,7 +55,7 @@ func (ja *jwtAuth) CreateJWT(c *AppClaims) (string, error) {
 }
 
 // CreateRefreshJWT returns a refresh token for provided token Claims.
-func (ja *jwtAuth) CreateRefreshJWT(c *RefreshClaims) (string, error) {
+func (ja *jwtAuth) CreateRefreshJWT(c RefreshClaims) (string, error) {
 	c.IssuedAt = time.Now().Unix()
 	c.ExpiresAt = time.Now().Add(ja.jwtExpiry).Unix()
 	_, tokenString, err := ja.Encode(c)
