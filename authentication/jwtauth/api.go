@@ -31,9 +31,9 @@ var (
 // JWTAuth implements the JWTAuth methods
 type JWTAuth interface {
 	// Functions to create JWTs
-	GenTokenPair(accessClaims AppClaims, refreshClaims RefreshClaims) (string, string, error)
-	CreateJWT(c AppClaims) (string, error)
-	CreateRefreshJWT(c RefreshClaims) (string, error)
+	GenTokenPair(accessClaims *AppClaims, refreshClaims *RefreshClaims) (string, string, error)
+	CreateJWT(c *AppClaims) (string, error)
+	CreateRefreshJWT(c *RefreshClaims) (string, error)
 
 	// Middlewares for validating JWT tokens
 	Authenticate(next http.Handler) http.Handler

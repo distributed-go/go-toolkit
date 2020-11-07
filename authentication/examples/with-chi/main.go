@@ -60,6 +60,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -68,27 +69,33 @@ import (
 )
 
 var tokenAuth jwtauth.JWTAuth
+var tokenSecret = []byte("secretpass")
 
 func init() {
-	tokenAuth := jwtauth.NewJWTAuth(jwtauth.Config{
-		JwtAuthAlgo: "HS256",
-		JwtParser:   &jwt.Parser{},
-		SignKey:     "sercret",
-		VerifyKey:   nil,
-		JwtExpiry:   time.Second * 60,
+	tokenAuth = jwtauth.NewJWTAuth(jwtauth.Config{
+		JwtAuthAlgo:      "HS256",
+		JwtParser:        &jwt.Parser{},
+		SignKey:          tokenSecret,
+		VerifyKey:        nil,
+		JwtExpiry:        time.Minute * 10,
+		JwtRefreshExpiry: time.Minute * 60,
 	})
 
 	// For debugging/example purposes, we generate and print
 	// a sample jwt token with claims `user_id:123` here:
-	accessToken, refreshToken, err := tokenAuth.GenTokenPair(jwtauth.AppClaims{
+	accessToken, refreshToken, err := tokenAuth.GenTokenPair(&jwtauth.AppClaims{
 		UserID: "123",
 		Name:   "Mike JSON",
 		Roles:  []jwtauth.Role{jwtauth.Role("USER"), jwtauth.Role("ADMIN_READ_ONLY")},
-	}, jwtauth.RefreshClaims{
+	}, &jwtauth.RefreshClaims{
 		UserID: "123",
 		Roles:  []jwtauth.Role{jwtauth.Role("USER"), jwtauth.Role("ADMIN_READ_ONLY")},
 	})
-	fmt.Printf("DEBUG: AccessToken: %s RefreshToken %s err %v \n", accessToken, refreshToken, err)
+	if err != nil {
+		fmt.Println("ERROR: ", err)
+		os.Exit(1)
+	}
+	fmt.Printf("AccessToken: %s \nRefreshToken: %s \n", accessToken, refreshToken)
 }
 
 func main() {
@@ -113,7 +120,7 @@ func router() http.Handler {
 
 		r.Get("/admin", func(w http.ResponseWriter, r *http.Request) {
 			_, claims, _ := tokenAuth.TokenFromContext(r.Context())
-			w.Write([]byte(fmt.Sprintf("protected area. hi %v", claims["user_id"])))
+			w.Write([]byte(fmt.Sprintf("protected area. hi %v", claims["uid"])))
 		})
 	})
 
