@@ -38,6 +38,7 @@ type JWTAuth interface {
 	// Middlewares for validating JWT tokens
 	Authenticate(next http.Handler) http.Handler
 	Verify() func(http.Handler) http.Handler
+	RequiresRole(role Role) func(next http.Handler) http.Handler
 
 	// Functions to extract tokens from http request
 	TokenFromCookie(r *http.Request) string
@@ -51,6 +52,7 @@ type JWTAuth interface {
 	// Functions to work with context
 	TokenFromContext(ctx context.Context) (*jwt.Token, jwt.MapClaims, error)
 	NewContext(ctx context.Context, t *jwt.Token, err error) context.Context
+	AppClaimsFromCtx(ctx context.Context) AppClaims
 
 	// Utility functions for setting token expiry
 	ExpireIn(tm time.Duration) int64

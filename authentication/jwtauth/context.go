@@ -44,3 +44,8 @@ func (ja *jwtAuth) NewContext(ctx context.Context, t *jwt.Token, err error) cont
 	ctx = context.WithValue(ctx, ErrorCtxKey, err)
 	return ctx
 }
+
+// AppClaimsFromCtx retrieves the parsed AppClaims from request context.
+func (ja *jwtAuth) AppClaimsFromCtx(ctx context.Context) AppClaims {
+	return ctx.Value(TokenCtxKey).(AppClaims)
+}

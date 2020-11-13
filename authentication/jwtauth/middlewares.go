@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/go-chi/render"
 )
 
 // Authenticate is a default authentication middleware to enforce access from the
@@ -111,12 +110,12 @@ func (ja *jwtAuth) verifyRequest(r *http.Request, findTokenFns ...func(r *http.R
 }
 
 // RequiresRole middleware restricts access to accounts having role parameter in their jwt claims.
-func (ja *jwtAuth) RequiresRole(role recruitermodel.Role) func(next http.Handler) http.Handler {
+func (ja *jwtAuth) RequiresRole(role Role) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hfn := func(w http.ResponseWriter, r *http.Request) {
-			claims := l.ClaimsFromCtx(r.Context())
+			claims := ja.AppClaimsFromCtx(r.Context())
 			if !hasRole(role, claims.Roles) {
-				render.Render(w, r, renderers.ErrorForbidden(authmodel.ErrInsufficientRights))
+				http.Error(w, http.StatusText(401), 401)
 				return
 			}
 			next.ServeHTTP(w, r)
