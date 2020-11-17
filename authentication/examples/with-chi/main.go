@@ -136,8 +136,8 @@ func router() http.Handler {
 		r.Use(tokenAuth.Authenticate)
 
 		// This middleware checks if the token has the appropriate ROLE to access
-		// the resources. It will return 403 if given role is not present in the JWT
-		r.Use(tokenAuth.RequiresRole(jwtauth.Role("ADMIN_READ_ONLY")))
+		// the resources. It will return 403 if given role is not present in the JWT Token
+		r.Use(tokenAuth.RequiresRole(jwtauth.Role("ADMIN_READ_ONLY"))) // try changing role to something else
 
 		r.Get("/adminReadOnly", func(w http.ResponseWriter, r *http.Request) {
 			_, claims, _ := tokenAuth.TokenFromContext(r.Context())

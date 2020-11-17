@@ -27,8 +27,8 @@ func (c *AppClaims) ParseClaims(claims jwt.MapClaims) error {
 	}
 	var roles []Role
 	if rl != nil {
-		for _, v := range rl.([]Role) {
-			r := v
+		for _, v := range rl.([]interface{}) {
+			r := v.(string)
 			roles = append(roles, Role(r))
 		}
 	}
@@ -49,19 +49,19 @@ func (c *AppClaims) ParseClaims(claims jwt.MapClaims) error {
 		c.Audience = aud.(string)
 	}
 	if exp, ok := claims["exp"]; ok {
-		c.ExpiresAt = exp.(int64)
+		c.ExpiresAt = int64(exp.(float64))
 	}
 	if jti, ok := claims["jti"]; ok {
 		c.Id = jti.(string)
 	}
 	if iat, ok := claims["iat"]; ok {
-		c.IssuedAt = iat.(int64)
+		c.IssuedAt = int64(iat.(float64))
 	}
 	if iss, ok := claims["iss"]; ok {
 		c.Issuer = iss.(string)
 	}
 	if nbf, ok := claims["nbf"]; ok {
-		c.NotBefore = nbf.(int64)
+		c.NotBefore = int64(nbf.(float64))
 	}
 	if sub, ok := claims["sub"]; ok {
 		c.Subject = sub.(string)
@@ -86,8 +86,8 @@ func (c *RefreshClaims) ParseClaims(claims jwt.MapClaims) error {
 	}
 	var roles []Role
 	if rl != nil {
-		for _, v := range rl.([]Role) {
-			r := v
+		for _, v := range rl.([]interface{}) {
+			r := v.(string)
 			roles = append(roles, Role(r))
 		}
 	}
@@ -103,19 +103,19 @@ func (c *RefreshClaims) ParseClaims(claims jwt.MapClaims) error {
 		c.Audience = aud.(string)
 	}
 	if exp, ok := claims["exp"]; ok {
-		c.ExpiresAt = exp.(int64)
+		c.ExpiresAt = int64(exp.(float64))
 	}
 	if jti, ok := claims["jti"]; ok {
 		c.Id = jti.(string)
 	}
 	if iat, ok := claims["iat"]; ok {
-		c.IssuedAt = iat.(int64)
+		c.ExpiresAt = int64(iat.(float64))
 	}
 	if iss, ok := claims["iss"]; ok {
 		c.Issuer = iss.(string)
 	}
 	if nbf, ok := claims["nbf"]; ok {
-		c.NotBefore = nbf.(int64)
+		c.ExpiresAt = int64(nbf.(float64))
 	}
 	if sub, ok := claims["sub"]; ok {
 		c.Subject = sub.(string)

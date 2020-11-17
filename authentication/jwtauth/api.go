@@ -24,8 +24,9 @@ var (
 
 // Context keys
 var (
-	TokenCtxKey = &contextKey{"Token"}
-	ErrorCtxKey = &contextKey{"Error"}
+	TokenCtxKey        = &contextKey{"Token"}
+	AccessClaimsCtxKey = &contextKey{"AccessClaims"}
+	ErrorCtxKey        = &contextKey{"Error"}
 )
 
 // JWTAuth implements the JWTAuth methods

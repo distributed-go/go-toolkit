@@ -1,6 +1,7 @@
 package jwtauth
 
 import (
+	"context"
 	"net/http"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -12,7 +13,7 @@ import (
 // until you decide to write something similar and customize your client response.
 func (ja *jwtAuth) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, _, err := ja.TokenFromContext(r.Context())
+		token, claims, err := ja.TokenFromContext(r.Context())
 
 		if err != nil {
 			http.Error(w, http.StatusText(401), 401)
@@ -24,8 +25,17 @@ func (ja *jwtAuth) Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		// Token is authenticated, pass it through
-		next.ServeHTTP(w, r)
+		// Token is authenticated, parse claims
+		var c AppClaims
+		err = c.ParseClaims(claims)
+		if err != nil {
+			http.Error(w, http.StatusText(401), 401)
+			return
+		}
+
+		// Set AppClaims on context
+		ctx := context.WithValue(r.Context(), AccessClaimsCtxKey, c)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
@@ -92,11 +102,6 @@ func (ja *jwtAuth) verifyRequest(r *http.Request, findTokenFns ...func(r *http.R
 				return token, ErrNBFInvalid
 			}
 		}
-		return token, err
-	}
-
-	if token == nil || !token.Valid {
-		err = ErrUnauthorized
 		return token, err
 	}
 
