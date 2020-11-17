@@ -124,6 +124,27 @@ func router() http.Handler {
 		})
 	})
 
+	// Protected routes with USER ROLES
+	r.Group(func(r chi.Router) {
+		// Seek, verify and validate JWT tokens
+		r.Use(tokenAuth.Verify())
+
+		// Handle valid / invalid tokens. In this example, we use
+		// the provided authenticator middleware, but you can write your
+		// own very easily, look at the Authenticator method in jwtauth.go
+		// and tweak it, its not scary.
+		r.Use(tokenAuth.Authenticate)
+
+		// This middleware checks if the token has the appropriate ROLE to access
+		// the resources. It will return 403 if given role is not present in the JWT
+		r.Use(tokenAuth.RequiresRole(jwtauth.Role("ADMIN_READ_ONLY")))
+
+		r.Get("/adminReadOnly", func(w http.ResponseWriter, r *http.Request) {
+			_, claims, _ := tokenAuth.TokenFromContext(r.Context())
+			w.Write([]byte(fmt.Sprintf("protected area - read only admin. hi %v", claims["uid"])))
+		})
+	})
+
 	// Public routes
 	r.Group(func(r chi.Router) {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
