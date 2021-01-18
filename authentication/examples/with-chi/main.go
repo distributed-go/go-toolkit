@@ -64,7 +64,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/distributed-go/go-toolkit/authentication/jwtauth"
+	jwtauth "github.com/distributed-go/go-toolkit/authentication"
 	"github.com/go-chi/chi"
 )
 
