@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/golang-microservices/go-microservice-toolkit/logging"
+	"github.com/distributed-go/go-toolkit/logging"
 	"go.uber.org/zap"
 )
 

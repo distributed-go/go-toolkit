@@ -1,4 +1,4 @@
-module github.com/golang-microservices/go-microservice-toolkit/authentication
+module github.com/distributed-go/go-toolkit/authentication
 
 go 1.13
 

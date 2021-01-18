@@ -64,8 +64,8 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/distributed-go/go-toolkit/authentication/jwtauth"
 	"github.com/go-chi/chi"
-	"github.com/golang-microservices/go-microservice-toolkit/authentication/jwtauth"
 )
 
 var tokenAuth jwtauth.JWTAuth

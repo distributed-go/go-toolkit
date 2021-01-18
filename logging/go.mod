@@ -1,4 +1,4 @@
-module github.com/golang-microservices/go-microservice-toolkit/logging
+module github.com/distributed-go/go-toolkit/logging
 
 go 1.13
 
