@@ -1,0 +1,7 @@
+github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
+github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
+github.com/distributed-go/go-toolkit v0.0.0-20210118083533-2549dfa6b8cd h1:C5LzkDJziG9qSWmPgU/O71fP0M2BUL0vZtfk56MuQ7Q=
+github.com/distributed-go/go-toolkit/authentication v0.0.0-20210118083533-2549dfa6b8cd h1:VN1H5FJkLzOQtIwTsyB5PVCOL9MYKYvOtKTURxc2d4c=
+github.com/distributed-go/go-toolkit/authentication v0.0.0-20210118083533-2549dfa6b8cd/go.mod h1:fwRKlQiwoWahTapudyLq4kBTMHNDAJY+vAOIqMT+X/Y=
+github.com/go-chi/chi v4.1.2+incompatible h1:fGFk2Gmi/YKXk0OmGfBh0WgmN3XB8lVnEyNz34tQRec=
+github.com/go-chi/chi v4.1.2+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
