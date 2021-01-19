@@ -1,3 +1,56 @@
+// ubuntu@ubuntu-VirtualBox:~$ curl -v http://localhost:3333/
+// *   Trying 127.0.0.1...
+// * TCP_NODELAY set
+// * Connected to localhost (127.0.0.1) port 3333 (#0)
+// > GET / HTTP/1.1
+// > Host: localhost:3333
+// > User-Agent: curl/7.58.0
+// > Accept: */*
+// >
+// < HTTP/1.1 200 OK
+// < Date: Tue, 19 Jan 2021 10:19:38 GMT
+// < Content-Length: 17
+// < Content-Type: text/plain; charset=utf-8
+// <
+// * Connection #0 to host localhost left intact
+// welcome anonymous
+
+// ubuntu@ubuntu-VirtualBox:~$ curl -v http://localhost:3333/admin/adminReadOnly
+// *   Trying 127.0.0.1...
+// * TCP_NODELAY set
+// * Connected to localhost (127.0.0.1) port 3333 (#0)
+// > GET /admin/adminReadOnly HTTP/1.1
+// > Host: localhost:3333
+// > User-Agent: curl/7.58.0
+// > Accept: */*
+// >
+// < HTTP/1.1 401 Unauthorized
+// < Content-Type: text/plain; charset=utf-8
+// < X-Content-Type-Options: nosniff
+// < Date: Tue, 19 Jan 2021 10:29:57 GMT
+// < Content-Length: 13
+// <
+// Unauthorized
+// * Connection #0 to host localhost left intact
+
+// ubuntu@ubuntu-VirtualBox:~$ curl -H"Authorization: BEARER eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiIxMjMiLCJuYW1lIjoiTWlrZSBKU09OIiwicm9sZXMiOlsiVVNFUiIsIkFETUlOX1JFQURfT05MWSJdLCJleHAiOjE2MTEwNTI3NzQsImlhdCI6MTYxMTA1MjE3NH0.MD8npUtLNC88sEc8TobfGTKiIaovlQkmgqYheXZrhJE" -v http://localhost:3333/admin/adminReadOnly
+// *   Trying 127.0.0.1...
+// * TCP_NODELAY set
+// * Connected to localhost (127.0.0.1) port 3333 (#0)
+// > GET /admin/adminReadOnly HTTP/1.1
+// > Host: localhost:3333
+// > User-Agent: curl/7.58.0
+// > Accept: */*
+// > Authorization: BEARER eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiIxMjMiLCJuYW1lIjoiTWlrZSBKU09OIiwicm9sZXMiOlsiVVNFUiIsIkFETUlOX1JFQURfT05MWSJdLCJleHAiOjE2MTEwNTI3NzQsImlhdCI6MTYxMTA1MjE3NH0.MD8npUtLNC88sEc8TobfGTKiIaovlQkmgqYheXZrhJE
+// >
+// < HTTP/1.1 200 OK
+// < Date: Tue, 19 Jan 2021 10:31:36 GMT
+// < Content-Length: 40
+// < Content-Type: text/plain; charset=utf-8
+// <
+// * Connection #0 to host localhost left intact
+// protected area - read only admin. hi 123
+
 package main
 
 import (
