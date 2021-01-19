@@ -1,4 +1,3 @@
-// jwtauth example
 //
 // Sample output:
 //
