@@ -1,1 +1,1 @@
-# jwtauth - JWT authentication middleware for Go HTTP services
+# authentication - JWT authentication middleware for Go HTTP services

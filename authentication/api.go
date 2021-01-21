@@ -1,4 +1,4 @@
-package jwtauth
+package authentication
 
 import (
 	"context"
@@ -14,12 +14,12 @@ type Role string
 
 // Library errors
 var (
-	ErrUnauthorized = errors.New("jwtauth: token is unauthorized")
-	ErrExpired      = errors.New("jwtauth: token is expired")
-	ErrNBFInvalid   = errors.New("jwtauth: token nbf validation failed")
-	ErrIATInvalid   = errors.New("jwtauth: token iat validation failed")
-	ErrNoTokenFound = errors.New("jwtauth: no token found")
-	ErrAlgoInvalid  = errors.New("jwtauth: algorithm mismatch")
+	ErrUnauthorized = errors.New("authentication: token is unauthorized")
+	ErrExpired      = errors.New("authentication: token is expired")
+	ErrNBFInvalid   = errors.New("authentication: token nbf validation failed")
+	ErrIATInvalid   = errors.New("authentication: token iat validation failed")
+	ErrNoTokenFound = errors.New("authentication: no token found")
+	ErrAlgoInvalid  = errors.New("authentication: algorithm mismatch")
 )
 
 // Context keys
