@@ -145,7 +145,7 @@ func TestMore(t *testing.T) {
 
 		authenticator := func(next http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				token, _, err := TokenAuthHS256.TokenFromContext(r.Context())
+				token, _, err := TokenFromContext(r.Context())
 
 				if err != nil {
 					switch err {
@@ -175,7 +175,7 @@ func TestMore(t *testing.T) {
 		r.Use(authenticator)
 
 		r.Get("/admin", func(w http.ResponseWriter, r *http.Request) {
-			_, claims, err := TokenAuthHS256.TokenFromContext(r.Context())
+			_, claims, err := TokenFromContext(r.Context())
 
 			if err != nil {
 				w.Write([]byte(fmt.Sprintf("error! %v", err)))

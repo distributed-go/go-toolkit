@@ -14,12 +14,15 @@ type contextKey struct {
 	name string
 }
 
-func (k *contextKey) String() string {
-	return "jwtauth context value " + k.name
-}
+// Context keys
+var (
+	TokenCtxKey        = &contextKey{"Token"}
+	AccessClaimsCtxKey = &contextKey{"AccessClaims"}
+	ErrorCtxKey        = &contextKey{"Error"}
+)
 
 // TokenFromContext extracts the JWT token from the request context
-func (ja *jwtAuth) TokenFromContext(ctx context.Context) (*jwt.Token, jwt.MapClaims, error) {
+func TokenFromContext(ctx context.Context) (*jwt.Token, jwt.MapClaims, error) {
 	token, _ := ctx.Value(TokenCtxKey).(*jwt.Token)
 
 	var claims jwt.MapClaims
@@ -39,13 +42,13 @@ func (ja *jwtAuth) TokenFromContext(ctx context.Context) (*jwt.Token, jwt.MapCla
 }
 
 // NewContext creates a new context with JWT token and error
-func (ja *jwtAuth) NewContext(ctx context.Context, t *jwt.Token, err error) context.Context {
+func NewContext(ctx context.Context, t *jwt.Token, err error) context.Context {
 	ctx = context.WithValue(ctx, TokenCtxKey, t)
 	ctx = context.WithValue(ctx, ErrorCtxKey, err)
 	return ctx
 }
 
 // AppClaimsFromCtx retrieves the parsed AppClaims from request context.
-func (ja *jwtAuth) AppClaimsFromCtx(ctx context.Context) AppClaims {
+func AppClaimsFromCtx(ctx context.Context) AppClaims {
 	return ctx.Value(AccessClaimsCtxKey).(AppClaims)
 }

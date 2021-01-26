@@ -1,7 +1,6 @@
 package authentication
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"time"
@@ -20,13 +19,6 @@ var (
 	ErrIATInvalid   = errors.New("authentication: token iat validation failed")
 	ErrNoTokenFound = errors.New("authentication: no token found")
 	ErrAlgoInvalid  = errors.New("authentication: algorithm mismatch")
-)
-
-// Context keys
-var (
-	TokenCtxKey        = &contextKey{"Token"}
-	AccessClaimsCtxKey = &contextKey{"AccessClaims"}
-	ErrorCtxKey        = &contextKey{"Error"}
 )
 
 // JWTAuth implements the JWTAuth methods
@@ -49,11 +41,6 @@ type JWTAuth interface {
 	// Functions to encode and decode tokens
 	Encode(claims jwt.Claims) (t *jwt.Token, tokenString string, err error)
 	Decode(tokenString string) (t *jwt.Token, err error)
-
-	// Functions to work with context
-	TokenFromContext(ctx context.Context) (*jwt.Token, jwt.MapClaims, error)
-	NewContext(ctx context.Context, t *jwt.Token, err error) context.Context
-	AppClaimsFromCtx(ctx context.Context) AppClaims
 
 	// Utility functions for setting token expiry
 	ExpireIn(tm time.Duration) int64

@@ -13,7 +13,7 @@ import (
 // until you decide to write something similar and customize your client response.
 func (ja *jwtAuth) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token, claims, err := ja.TokenFromContext(r.Context())
+		token, claims, err := TokenFromContext(r.Context())
 
 		if err != nil {
 			http.Error(w, http.StatusText(401), 401)
@@ -66,7 +66,7 @@ func (ja *jwtAuth) verify(findTokenFns ...func(r *http.Request) string) func(htt
 		hfn := func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 			token, err := ja.verifyRequest(r, findTokenFns...)
-			ctx = ja.NewContext(ctx, token, err)
+			ctx = NewContext(ctx, token, err)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 		return http.HandlerFunc(hfn)
@@ -118,7 +118,7 @@ func (ja *jwtAuth) verifyRequest(r *http.Request, findTokenFns ...func(r *http.R
 func (ja *jwtAuth) RequiresRole(role Role) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hfn := func(w http.ResponseWriter, r *http.Request) {
-			claims := ja.AppClaimsFromCtx(r.Context())
+			claims := AppClaimsFromCtx(r.Context())
 			if !hasRole(role, claims.Roles) {
 				http.Error(w, http.StatusText(401), 401)
 				return
